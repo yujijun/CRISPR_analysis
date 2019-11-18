@@ -2,4 +2,6 @@
 
 export(Volcano)
 export(volcanodisplay)
+export(volcanodisplaymultigene)
 export(volcanodisplayrep)
+export(volcanodisplaysinglegene)
