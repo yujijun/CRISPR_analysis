@@ -33,8 +33,10 @@ Volcano <- function(data = data,
     geom_vline(xintercept=xline, linetype="dashed", color = "grey")+
     geom_point(data = label_data, aes_string(x=x,y=y,fill=fill,color=color))+
     #geom_text_repel(label = label_data$Official)
-    theme(plot.title = element_text(hjust = 0.5),legend.position = "none")
-
+    theme(plot.title = element_text(hjust = 0.5),legend.position = "right") +
+    theme(legend.text = element_text(size = 10,face = "bold")) +
+    theme(legend.title = element_text(size = 15,face = "bold"))
+    #guides(colour = guide_legend(override.aes = list(shape = 15)))
   #geom_text(aes(label=subset_data, color=subset_data), size=10)
   if (plotLab==T) {
     p<- p+geom_text_repel(data=label_data, aes_string(label=label))

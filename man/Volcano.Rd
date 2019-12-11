@@ -4,11 +4,22 @@
 \alias{Volcano}
 \title{This is a volcano plot function}
 \usage{
-Volcano(data = data, x = "log2FoldChange", y = "Padj", fill,
-  color = "Threshold", color_palette = c("#8DA0CB", "grey", "#FC8D62"),
-  label = "gene", label_data = subset_data, alpha = 0.5,
-  plotLab = T, xlab = "log2 Fold Change", ylab = "log10 Padj",
-  title = "Volcano Plot of genes", xline = c(-1, 1))
+Volcano(
+  data = data,
+  x = "log2FoldChange",
+  y = "Padj",
+  fill,
+  color = "Threshold",
+  color_palette = c("#8DA0CB", "grey", "#FC8D62"),
+  label = "gene",
+  label_data = subset_data,
+  alpha = 0.5,
+  plotLab = T,
+  xlab = "log2 Fold Change",
+  ylab = "log10 Padj",
+  title = "Volcano Plot of genes",
+  xline = c(-1, 1)
+)
 }
 \arguments{
 \item{data}{the dataframe you would like to display}

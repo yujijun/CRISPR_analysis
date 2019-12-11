@@ -4,8 +4,13 @@
 \alias{volcanodisplay}
 \title{This is for volcanodisplay}
 \usage{
-volcanodisplay(basic_path, specific_path, file_name, verified_gene,
-  output_path)
+volcanodisplay(
+  basic_path,
+  specific_path,
+  file_name,
+  verified_gene,
+  output_path
+)
 }
 \arguments{
 \item{basic_path}{your basic path for input file, string.}
