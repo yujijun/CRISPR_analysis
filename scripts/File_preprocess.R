@@ -66,7 +66,7 @@ Output.file17 <- "31126740_Lingyin Li_MolecularCell_2019"
 Output.file18 <- "30449619_Alexander Marson_Cell_2018"
 Output.file19 <- "31303383_Daniel S. Peeper_Cell_2019"
 #### Data processing #### 
-setwd(paste0(Input.path,Input.file7)) #para change first
+setwd(paste0(Input.path,Input.file10)) #para change first
 #>>>>>>>>>>rawcount data####
 #file two####
 rawdata <- read.table("./count/PD-L1_CMTM6.count.txt",header = T,stringsAsFactors = F)
@@ -230,6 +230,8 @@ colnames(lib.1) <- lib.colnames
 colnames(lib.2) <- lib.colnames
 
 #file ten####
+library(dplyr)
+library(tibble)
 rawdata <- read.delim(file = "./rawdata/hsc4_ADAR_suppressor_count.txt",header = T,stringsAsFactors = F,sep = "\t")
 lib <- rawdata[c(1,2)]
 rownames(lib) <- paste0("sgRNA",seq(1,nrow(lib),1))
@@ -942,3 +944,235 @@ for(i in Output.filename){
 }
 #Sys.setlocale("LC_ALL","English")
 #Sys.setlocale("LC_CTYPE","en_US.UTF-8")
+
+setwd("..")
+folder.list <- list.files()
+nonessential_gene <- read.delim("../../Reference/nonessential_ctrl_sgrna_list.txt",sep = "\t",header = F)
+for (i in folder.list){
+  #i = folder.list[4]
+  setwd(i)
+  rawcount.tmp  <- read.delim("./rawcount/rawcount.txt",sep = "\t",header = T,stringsAsFactors = F)
+  lib.tmp <- read.delim("./lib/library.csv",sep = "\t",header = T,stringsAsFactors = F)
+  print(all(rawcount.tmp$sgRNA == lib.tmp$sgRNA_ID))
+  rawcount.tmp$sgRNA <- lib.bigbead$sgRNA_ID
+  zero_row <- which(rowSums(rawcount.tmp[3:6]) == 0)
+  rawcount.tmp <- rawcount.tmp[-zero_row,]
+  print(dim(rawcount.tmp))
+  write.table(rawcount.tmp,file = "./rawcount/rawcount.txt",sep = "\t",col.names = T,row.names = F,quote = F)
+  setwd("..")
+}
+rawcount.bigbead  <- read.delim("./rawcount/rawcount.txt",sep = "\t",header = T,stringsAsFactors = F)
+lib.bigbead <- read.delim("./lib/library.csv",sep = "\t",header = T,stringsAsFactors = F)
+rawcount.bigbead$sgRNA <- lib.bigbead$sgRNA_ID
+nonessential_sgRNA.bigbead <- lib.bigbead$sgRNA_ID[which(lib.bigbead$Gene %in% nonessential_gene$V1)]
+nonessential_sgRNA <- read.delim("./lib/nonessential_ctrl_sgrna_list.txt",sep = "\t")
+
+
+#-----refine the file 31452512 ####
+setwd("/Users/yujijun/Documents/01-Work/07-CRISPR_annotation/Output/31452512_Jeffrey\ Settleman_Elife_2019_2")
+rawdata <- read.delim(file = "./rawcount/rawcount.txt",sep = "\t",header = T,stringsAsFactors = F)
+sgRNA <- read.delim(file = "./lib/nonessential_ctrl_sgrna_list.txt",sep = "\t",header = F,stringsAsFactors = F)
+lib <- read.delim(file = "./lib/library.csv",sep = "\t",header = T,stringsAsFactors = F)
+rawdata <- rawdata[-grep(":",rawdata$Gene),]
+rawdata <- rawdata[complete.cases(rawdata),]
+zero_row <- which(rowSums(rawdata[3:6]) == 0)
+rawdata <- rawdata[-zero_row,]
+lib <- lib[which(lib$sgRNA_ID %in% rawdata$sgRNA),]
+sgRNA.new <- intersect(sgRNA$V1,lib$sgRNA_ID)
+write.table(rawdata,file = "./rawcount/rawcount.txt",sep = "\t",quote = F,col.names = T,row.names = F)
+write.table(sgRNA.new,file = "./lib/nonessential_ctrl_sgrna_list.txt",sep = "\t",quote = F,col.names = F,row.names = F)
+write.table(lib,file = "./lib/library.csv",sep = "\t",quote = F,col.names = T,row.names = F)
+
+#------refine the file  30559422 #####
+setwd("/Users/yujijun/Documents/01-Work/07-CRISPR_annotation/Output/30559422_E. Robert McDonald III_NatMed_2018/")
+rawdata <- read.delim(file = "./rawcount/rawcount.txt",sep = "\t",header = T,stringsAsFactors = F)
+sgRNA <- read.delim(file = "./lib/nonessential_ctrl_sgrna_list.txt",sep = "\t",header = F,stringsAsFactors = F)
+lib <- read.delim(file = "./lib/library.csv",sep = "\t",header = T,stringsAsFactors = F)
+rawdata <- rawdata[-grep(":",rawdata$Gene),]
+rawdata <- rawdata[complete.cases(rawdata),]
+#zero_row <- which(rowSums(rawdata[3:6]) == 0)
+#rawdata <- rawdata[-zero_row,]
+lib <- lib[which(lib$sgRNA_ID %in% rawdata$sgRNA),]
+sgRNA.new <- intersect(sgRNA$V1,lib$sgRNA_ID)
+write.table(rawdata,file = "./rawcount/rawcount.txt",sep = "\t",quote = F,col.names = T,row.names = F)
+write.table(sgRNA.new,file = "./lib/nonessential_ctrl_sgrna_list.txt",sep = "\t",quote = F,col.names = F,row.names = F)
+write.table(lib,file = "./lib/library.csv",sep = "\t",quote = F,col.names = T,row.names = F)
+
+
+#file copy annotation from Output folder into Result:
+Output.folder <- "/Users/yujijun/Documents/01-Work/07-CRISPR_annotation/Output/"
+Result.folder <- "/Users/yujijun/Documents/01-Work/07-CRISPR_annotation/Result/"
+setwd(Output.folder)
+filename <- list.files()
+filename <- filename[-c(14,29,30)]
+for(i in filename[-13]){
+  print(i)
+  from.folder <- paste0(Output.folder,i,"/annotation")
+  to.folder <- paste0(Result.folder,i)
+  file.copy(from=from.folder,to=to.folder,recursive = T)
+  remove.file1 <- paste0(to.folder,"/config.yaml~")
+  remove.file2 <- paste0(to.folder,"/config.yaml.bak")
+  remove.file3 <- paste0(to.folder,"/#config.yaml#")
+  remove.file4 <- paste0(to.folder,"/config.yaml.bak1")
+  file.remove(remove.file1)
+  file.remove(remove.file2)
+  file.remove(remove.file3)
+  file.remove(remove.file4)
+}
+
+#copy the annotation from output folder into result folder.
+Output.folder <- "/Users/yujijun/Documents/01-Work/07-CRISPR_annotation/Output/30397336_Michael C. Bassik_NatGenet_2018/"
+Result.folder <- "/Users/yujijun/Documents/01-Work/07-CRISPR_annotation/Result/30397336_Michael C. Bassik_NatGenet_2018/"
+setwd(Output.folder)
+filename <- list.files()
+for(i in filename){
+  print(i)
+  from.folder <- paste0(Output.folder,i,"/annotation")
+  to.folder <- paste0(Result.folder,i)
+  file.copy(from=from.folder,to=to.folder,recursive = T)
+  remove.file1 <- paste0(to.folder,"/config.yaml~")
+  remove.file2 <- paste0(to.folder,"/config.yaml.bak")
+  remove.file3 <- paste0(to.folder,"/#config.yaml#")
+  remove.file4 <- paste0(to.folder,"/config.yaml.bak1")
+  file.remove(remove.file1)
+  file.remove(remove.file2)
+  file.remove(remove.file3)
+  file.remove(remove.file4)
+}
+
+#refine 30639098 
+output.30639098 <- "/Users/yujijun/Documents/01-Work/07-CRISPR_annotation/Result/30639098_Sarah\ A.\ Teichmann_Cell_2018"
+setwd(output.30639098)
+rawdata <- read.delim(file = "./rawcount/rawcount.txt",header = T,sep = "\t",stringsAsFactors = F)
+rawdata.sc2a_irf4 <- rawdata[,grep("sc2a_irf4",colnames(rawdata))]
+rawdata.sc2b_xbp1 <- rawdata[,grep("sc2b_xbp1",colnames(rawdata))]
+rawdata.sc1_il13 <- rawdata[,grep("sc1_il13",colnames(rawdata))]
+rawdata.s11_IL13 <- rawdata[,grep("s11_IL13",colnames(rawdata))]
+rawdata.sx4_IRF4 <- rawdata[,grep("sx4_IRF4",colnames(rawdata))]
+rawdata.sc3_gata3 <- rawdata[,grep("sc3_gata3",colnames(rawdata))]
+#rawdata.sx2_STL <- rawdata[,grep("sx2_STL",colnames(rawdata))]
+rawdata.s8a_STL <- rawdata[,grep("s8a_STL",colnames(rawdata))]
+rawdata.s10_FOXP3 <- rawdata[,grep("s10_FOXP3",colnames(rawdata))]
+rawdata.cd103 <- rawdata[,grep("cd103",colnames(rawdata))]
+rawdata.s9_STG <- rawdata[,grep("s9_STG",colnames(rawdata))]
+rawdata.s8b_XBP1 <- rawdata[,grep("s8b_XBP1",colnames(rawdata))]
+rawdata.first_il4 <- rawdata[,grep("first_il4",colnames(rawdata))]
+
+folder.create <- c("sc2a_irf4","sc2b_xbp1","sc1_il13","s11_IL13","sx4_IRF4",
+                  "sc3_gata3","s8a_STL","s10_FOXP3","cd103","s9_STG",
+                  "s8b_XBP1","first_il4")
+for(i in folder.create){
+  dir.create(i)
+  setwd(i)
+  #unlink("rawdata",recursive = T)
+  dir.create("rawcount")
+  setwd("rawcount")
+  rawdata.tmp <- rawdata[,grep(i,colnames(rawdata))]
+  rawdata.tmp <- cbind(rawdata[c("sgRNA","Gene")],rawdata.tmp)
+  write.table(rawdata.tmp,file = "rawcount.txt",sep = "\t",quote = F,col.names = T,row.names = F)
+  file.copy(from = "../../lib",to = "..",recursive = T)
+  setwd("../..")
+}
+
+#annotation for 30639098
+folder.create <- c("sc2a_irf4","sc2b_xbp1","sc1_il13","s11_IL13","sx4_IRF4",
+                   "sc3_gata3","s8a_STL","s10_FOXP3","cd103","s9_STG",
+                   "s8b_XBP1","first_il4")
+basic.name <- "30639098_Sarah A. Teichmann_Cell_2018/"
+for(i in folder.create){
+  setwd(i)
+  print(i)
+  dir.create("annotation")
+  rawcount <- read.delim(file = "./rawcount/rawcount.txt",header = T,sep = "\t",stringsAsFactors = F)
+  rep_time <- ncol(rawcount)-2
+  Sample_ID <- seq(1,rep_time,1)
+  Dir.tmp <- paste0(basic.name,i)
+  Dir_Name <- rep(Dir.tmp,rep_time)
+  Publication <- rep("pmid",rep_time)
+  Organism <- rep("Mouse",rep_time)
+  if(i != "s11_IL13"){
+    initial.tmp <- paste0(i,"_neg")
+  }else{
+    initial.tmp <- paste0(i,"_low")
+  }
+  Initial_Condition <- rep(initial.tmp,rep_time)
+  Cell_Line <- rep("Th2",rep_time)
+  Type <- rep("ko",rep_time)
+  Library <- rep(1,rep_time)
+  Norm_method <- rep("350_noness",rep_time)
+  Treatment <- rep(i,rep_time)
+  Other_Conditions <- rep(NA,rep_time)
+  Culture_Days <- rep(7,rep_time)
+  Sample <- colnames(rawcount)[3:ncol(rawcount)]
+  Source <- rep("counts",rep_time)
+  Contact <- rep("JijunYu",rep_time)
+  Public_Status <- rep("public",rep_time)
+  all_Initial <- strsplit(Initial_Condition[1],split = ",")[[1]]
+  Is_Initial_Condition <- Sample  %in% all_Initial
+  from <- c(FALSE,TRUE)
+  to <- c("NO","YES")
+  Is_Initial_Condition <- plyr::mapvalues(Is_Initial_Condition,from = from,to=to)
+  Tmp.sample <- data.frame(Sample_ID,Dir_Name,Publication,Organism,Initial_Condition,Cell_Line,Type,
+                           Library,Norm_method,Treatment,Other_Conditions,Culture_Days,Sample,Is_Initial_Condition,
+                           Source,Contact,Public_Status)
+  write.table(Tmp.sample,file = "./annotation/sample.txt",col.names = T,row.names = F,sep = "\t",quote = F)
+  file.copy(from = "../annotation/cellline.txt",to = "./annotation/")
+  file.copy(from = "../annotation/library.txt",to = "./annotation/")
+  file.copy(from = "../annotation/publication.txt",to = "./annotation/")
+  setwd("..")
+}
+
+
+#change the Dirname 
+setwd("/Users/yujijun/Documents/01-Work/07-CRISPR_annotation/Result/30397336_Michael\ C.\ Bassik_NatGenet_2018")
+folder.name <- list.files()
+for(i in folder.name){
+  setwd(i)
+  setwd("annotation")
+  sample <- read.delim("sample.txt",sep = "\t",stringsAsFactors = F,header = T)
+  sample$Dir_Name <- paste0(sample$Dir_Name,"/",i)
+  write.table(sample, file = "sample.txt",sep = "\t",row.names = F,quote = F,col.names = T)
+  setwd("../..")
+}
+
+
+#delete all empty in folder name 
+setwd("..")
+all.folder <- list.files()
+all.folder <- all.folder[-grep(".sh",all.folder)]
+for(i in all.folder[14:27]){
+  to <- stri_replace_all_fixed(i,".","")
+  to <- stri_replace_all_fixed(to," ","")
+  print(to)
+  file.rename(from = i,to)
+  setwd(to)
+  sample <- read.delim("./annotation/sample.txt",sep = "\t",stringsAsFactors = F,header = T)
+  sample$Dir_Name <- stri_replace_all_fixed(sample$Dir_Name,i,to)
+  write.table(sample,file = "./annotation/sample.txt",sep = "\t",col.names = T,row.names = F,quote = F)
+  setwd("..")
+}
+
+#propressing 30397336
+setwd("./30397336_MichaelCBassik_NatGenet_2018/")
+folder.3039 <- list.files()
+for(i in folder.3039){
+  setwd(i)
+  sample <- read.delim("./annotation/sample.txt",sep = "\t",stringsAsFactors = F,header = T)
+  to <- "30397336_MichaelCBassik_NatGenet_2018/"
+  sample$Dir_Name <- paste0(to,i)
+  write.table(sample,file = "./annotation/sample.txt",sep = "\t",col.names = T,row.names = F,quote = F)
+  setwd("..")
+}
+
+#propressing 30639098
+setwd("./30639098_SarahATeichmann_Cell_2018/")
+folder.3063 <- list.files()
+for(i in folder.3063){
+  setwd(i)
+  sample <- read.delim("./annotation/sample.txt",sep = "\t",stringsAsFactors = F,header = T)
+  to <- "30639098_SarahATeichmann_Cell_2018/"
+  sample$Dir_Name <- paste0(to,i)
+  write.table(sample,file = "./annotation/sample.txt",sep = "\t",col.names = T,row.names = F,quote = F)
+  setwd("..")
+}
+
